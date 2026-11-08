@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Última Muralha</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya:wght@400;500;700&family=Alegreya+Sans+SC:wght@500;700&family=IM+Fell+English+SC&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+  <canvas id="cv" aria-label="Campo de batalha"></canvas>
+  <header id="hud" hidden>
+    <div class="cell">
+      <div class="hp" role="img" aria-label="Vida"><i id="hpfill"></i><span id="hptext"></span></div>
+      <div class="en" id="en" role="img" aria-label="Energia da onda" hidden><i id="enfill"></i></div>
+      <div class="row">
+        <svg class="gi blue" viewBox="0 0 24 24" fill="currentColor" aria-label="Gemas azuis"><path d="M12 2l8 7-8 13L4 9z"/></svg><b id="blue">0</b>
+        <svg class="gi purple" id="purg" viewBox="0 0 24 24" fill="currentColor" aria-label="Gemas roxas" hidden><path d="M12 2l8 7-8 13L4 9z"/></svg><b id="pur" hidden>0</b>
+        <svg class="gi heart" viewBox="0 0 24 24" fill="currentColor" aria-label="Vidas extras"><path d="M12 21s-7.5-4.6-9.5-9.6A5.3 5.3 0 0 1 12 6.2a5.3 5.3 0 0 1 9.5 5.2C19.5 16.4 12 21 12 21z"/></svg><b id="lives">3</b>
+      </div>
+    </div>
+    <div class="cell mid"><div class="rnd" id="round">Prepare-se</div><span class="lab" id="rsub"></span></div>
+    <div class="cell end"><span class="lab">Abates</span><b id="kills">0</b></div>
+  </header>
+  <button id="pausebtn" hidden aria-label="Pausar e abrir configurações"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>Pausa</button>
+  <div id="boss" hidden><span class="lab" id="bossname">Chefão</span><div class="bar"><i id="bossfill"></i></div></div>
+  <div id="banner" hidden></div>
+  <ul id="loadout" hidden></ul>
+  <div id="skills" hidden></div>
+  <section class="screen" id="screen" hidden></section>
+</div>
+
+
+<script src="js/core/utils.js"></script>
+<script src="js/core/data.js"></script>
+<script src="js/core/state.js"></script>
+<script src="js/core/config.js"></script>
+<script src="js/audio/engine.js"></script>
+<script src="js/audio/music.js"></script>
+<script src="js/ui/settings.js"></script>
+<script src="js/ui/skillbar.js"></script>
+<script src="js/world/city.js"></script>
+<script src="js/world/collision.js"></script>
+<script src="js/world/navigation.js"></script>
+<script src="js/world/camera.js"></script>
+<script src="js/core/game.js"></script>
+<script src="js/core/input.js"></script>
+<script src="js/ui/screens.js"></script>
+<script src="js/entities/spawner.js"></script>
+<script src="js/combat/enemy-attacks.js"></script>
+<script src="js/combat/player-skills.js"></script>
+<script src="js/entities/boss-ai.js"></script>
+<script src="js/entities/enemy-ai.js"></script>
+<script src="js/core/update.js"></script>
+<script src="js/render/draw.js"></script>
+<script src="js/ui/hud.js"></script>
+<script src="js/core/main.js"></script>
+</body>
+</html>
