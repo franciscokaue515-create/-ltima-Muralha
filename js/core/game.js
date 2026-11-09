@@ -1,9 +1,11 @@
 'use strict';
-function newGame() {
+function newGame(char) {
+  char = char || 'warrior'; applyChar(char); rebuildSkillbar();
   const oldCam = G ? G.cam : { x: 0, y: 130 };
   G = {
-    t: 0, kills: 0, blue: 0, purple: 0,
-    p: { x: 0, y: 130, r: 13, vx: 0, vy: 0, hp: 100, maxhp: 100, face: 0, iframes: 0, hurt: 0, dash: null, channel: 0, chMax: .5, burn: 0, bt: 0 },
+    char, t: 0, flame: null, nets: [], rains: [], bombsP: [], squires: [], orbs: [], zaps: [], rope: null,
+     kills: 0, blue: 0, purple: 0,
+    p: { x: 0, y: 130, r: 13, vx: 0, vy: 0, hp: CHARS[char].hp, maxhp: CHARS[char].hp, face: 0, iframes: 0, hurt: 0, dash: null, channel: 0, chMax: .5, burn: 0, bt: 0 },
     cam: { x: oldCam.x, y: oldCam.y },
     enemies: [], shots: [], es: [], hz: [], fire: [], gems: [], loot: [], parts: [], texts: [], fx: [],
     core: { sword: 1, whirl: 1, dash: 1, shock: 1 },

@@ -41,11 +41,11 @@ function update(dt) {
   const aim = aimAngle();
   p.face += angDiff(p.face, aim) * Math.min(1, dt * 22);
   if (p.channel > 0) {
-    p.channel -= dt;
-    if (p.channel <= 0) { p.channel = 0; blast(); }
+    p.channel -= dt; if (p.chInv) p.iframes = Math.max(p.iframes, .1);
+    if (p.channel <= 0) { p.channel = 0; const f = p.chFn; p.chFn = null; if (f) f(); }
   } else if (p.dash) {
     const d = p.dash;
-    moveP(d.vx * dt, d.vy * dt); d.t -= dt;
+    moveP(d.vx * dt, d.vy * dt); d.t -= dt; if (d.rap) rappelTick();
     G.fx.push({ k: 'ghost', x: p.x, y: p.y, t: .22, max: .22 });
     if (d.t <= 0) p.dash = null;
   } else {
@@ -68,7 +68,7 @@ function update(dt) {
 
   if (G.en > 0 && G.en < 100 && G.t - G.lastHit > 6) G.en = Math.max(0, G.en - 15 * dt);
   // ataque básico (botão esquerdo, segurar repete)
-  if (mouse.left && G.cd.sword <= 0 && p.channel <= 0) swing();
+  if (mouse.left && G.cd.sword <= 0 && p.channel <= 0 && !p.dash) CAST[G.char].sword();
 
   // giro devastador (sem empurrar)
   const wh = G.whirl;
@@ -109,6 +109,7 @@ function update(dt) {
     const e = en[i]; if (e.dead) continue;
     const dx = p.x - e.x, dy = p.y - e.y, d = Math.hypot(dx, dy) || 1, a = Math.atan2(dy, dx);
     if (e.flash > 0) e.flash -= dt;
+    if (e.fz > 0 || e.brn > 0) { statusTick(e, dt); if (e.dead) continue; }
     const edt = e.slow > 0 ? dt * .45 : dt; if (e.slow > 0) e.slow -= dt;
     if (e.stun > 0) e.stun -= dt;
     else {
@@ -137,6 +138,10 @@ function update(dt) {
       e.sk = 1.6; const mvd = Math.hypot(e.x - e.sx, e.y - e.sy); e.sx = e.x; e.sy = e.y;
       const hold = e.boss || e.sm || e.stun > 0 || e.fuse > 0 || e.slow > 0 || e.type === 'mage' || ((e.type === 'skelarcher' || e.type === 'gobarcher') && d <= e.T.range && !e.nav);
       if (!hold && mvd < 12) { if (++e.stk >= 2) { e.stk = 0; const q = spawnPos(0, e.cr); e.x = q.x; e.y = q.y; e.kx = e.ky = 0; } } else e.stk = 0;
+      // preso "andando": gira em volta de uma árvore/estrutura sem chegar mais perto de um jogador que quase não se mexe
+      const pm = Math.hypot(p.x - (e.px || p.x), p.y - (e.py || p.y)); e.px = p.x; e.py = p.y;
+      if (!hold && d > 150 && pm < 70 && d > (e.pd || 1e9) - 14) { if (++e.pc >= 3) { e.pc = 0; const q = spawnPos(0, e.cr); e.x = q.x; e.y = q.y; e.kx = e.ky = 0; } } else e.pc = 0;
+      e.pd = d;
     }
     e.x += e.kx * dt; e.y += e.ky * dt;
     const kd = Math.max(0, 1 - dt * 7); e.kx *= kd; e.ky *= kd;
@@ -173,23 +178,31 @@ function update(dt) {
 
   // armas automáticas
   for (const id in G.weapons) WEAPON_UPDATE[id](G.weapons[id], dt);
+  updateExtras(dt);
 
   // projéteis do jogador
   for (let i = G.shots.length - 1; i >= 0; i--) {
     const s = G.shots[i];
     s.x += s.vx * dt; s.y += s.vy * dt; s.life -= dt;
-    if (s.x < MAP.x0 || s.x > MAP.x1 || s.y < MAP.y0 || s.y > MAP.y1) s.life = 0;
+    if (s.x < MAP.x0 || s.x > MAP.x1 || s.y < MAP.y0 || s.y > MAP.y1) { s.life = 0; s.wall = true; }
+    else if (s.solid && s.life > 0 && blockedAt(s.x, s.y, 3)) { s.life = 0; s.wall = true; }
     if (s.life > 0) {
       for (const e of en) {
         if (e.dead || s.hit.indexOf(e.id) >= 0) continue;
         const dx = e.x - s.x, dy = e.y - s.y, rr = e.r + 5;
         if (dx * dx + dy * dy < rr * rr) {
-          s.hit.push(e.id); hitEnemy(e, s.dmg, s.x - s.vx * .02, s.y - s.vy * .02, 90);
+          s.hit.push(e.id);
+          if (s.aoe) { boomShot(s); s.aoe = null; s.life = 0; break; }
+          hitEnemy(e, s.dmg, s.x - s.vx * .02, s.y - s.vy * .02, 90);
+          if (!e.dead) { if (s.slow) e.slow = Math.max(e.slow, s.slow); if (s.burn) ignite(e, s.burn, 3); }
           if (s.pierce > 0) s.pierce--; else { s.life = 0; break; }
         }
       }
     }
-    if (s.life <= 0) { G.shots[i] = G.shots[G.shots.length - 1]; G.shots.pop(); }
+    if (s.life <= 0) {
+      if (s.aoe && (s.end || s.wall || s.kind === 'fire')) boomShot(s);
+      G.shots[i] = G.shots[G.shots.length - 1]; G.shots.pop();
+    }
   }
 
   // ataques inimigos

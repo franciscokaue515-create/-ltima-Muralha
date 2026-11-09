@@ -21,7 +21,7 @@ function spawnEnemy(type, x, y, sm, ex) {
   const e = {
     id: ++uid, type, T, x, y, r: T.r, hp: T.hp * hpMul, maxhp: T.hp * hpMul,
     spd: T.spd * (boss ? 1 : 1 + Math.min((n - 1) * .03, .3)), dmg: T.dmg * dm, dm, xp: T.xp, mass: T.mass, boss,
-    losT: Math.random() * .3, nav: false, navT: 0, fa: 0, sk: 1.6, stk: 0, sx: x, sy: y, slow: 0, cr: Math.min(T.r, 34), noClip: type === 'dragon', en: 1, fuse: 0, kx: 0, ky: 0, flash: 0, stun: 0, ph: rand(0, TAU), face: 0, dead: false, hitAxe: -9,
+    losT: Math.random() * .3, nav: false, navT: 0, fa: 0, sk: 1.6, stk: 0, pc: 0, sx: x, sy: y, slow: 0, cr: Math.min(T.r, 34), noClip: type === 'dragon', en: 1, fuse: 0, kx: 0, ky: 0, flash: 0, stun: 0, ph: rand(0, TAU), face: 0, dead: false, hitAxe: -9,
     st: null, sT: 0, cm: 1, atk: rand(.4, T.rate || 1), skT: rand(1.2, 3), mtT: rand(3, 8), tr: 0, carry: false, sm: !!sm
   };
   if (sm) { if (blockedAt(e.x, e.y, e.cr)) { const q = findFree(x, y, 60, e.cr); if (q) { e.x = q.x; e.y = q.y; } else { e.x = x; e.y = y; } } }
@@ -113,15 +113,15 @@ function sparks(x, y, n, c, sp) {
     G.parts.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, t: rand(.25, .55), max: .55, c, s: rand(1.5, 3.2) });
   }
 }
-function hitEnemy(e, dmg, ox, oy, force) {
+function hitEnemy(e, dmg, ox, oy, force, quiet) {
   dmg = Math.max(1, Math.round(dmg * S.might));
-  e.hp -= dmg; e.flash = .09; G.lastHit = G.t; sfx('hit', .8);
+  e.hp -= dmg; e.flash = .09; G.lastHit = G.t; if (!quiet) sfx('hit', .8);
   if (force) {
     const dx = e.x - ox, dy = e.y - oy, d = Math.hypot(dx, dy) || 1, k = force / Math.sqrt(e.mass);
     e.kx = clamp(e.kx + dx / d * k, -1400, 1400); e.ky = clamp(e.ky + dy / d * k, -1400, 1400);
   }
   popText(e.x, e.y - e.r, dmg, '#f3efe2');
-  if (e.hp <= 0 && !e.dead) killEnemy(e); else sparks(e.x, e.y, 2, '#e9efe6', 70);
+  if (e.hp <= 0 && !e.dead) killEnemy(e); else if (!quiet) sparks(e.x, e.y, 2, '#e9efe6', 70);
 }
 function killEnemy(e, silent) {
   if (e.dead) return;
@@ -129,7 +129,7 @@ function killEnemy(e, silent) {
   if (e.type === 'bomber') explode(e.x, e.y, BOMB.rad[e.en - 1], BOMB.dmg[e.en - 1] * e.dm, '255,170,40');
   if (silent) return;
   G.kills++; sfx(e.boss ? 'boom' : 'kill');
-  if (G.core.sword >= 4) G.en = Math.min(100, G.en + (e.boss ? 30 : 5));
+  if (G.char === 'warrior' && G.core.sword >= 4) G.en = Math.min(100, G.en + (e.boss ? 30 : 5));
   if (e.boss) {
     for (let i = 0; i < 8; i++) G.gems.push({ x: e.x + rand(-30, 30), y: e.y + rand(-30, 30), v: Math.round(e.xp / 8), kind: 'blue', pull: true, sp: 0 });
     banner(e.T.name + ' derrotado'); G.bossRef = null; G.shake = 10;
@@ -143,8 +143,8 @@ function killEnemy(e, silent) {
   sparks(e.x, e.y, e.boss ? 40 : 7, TYPE_COLOR[e.type], e.boss ? 220 : 120);
 }
 function shieldBlock() {
-  const w = G.weapons.shield; if (!w || w.cd > 0) return false;
-  w.cd = WEAPONS.shield.lv[w.lvl - 1].cd; G.p.iframes = Math.max(G.p.iframes, .6);
+  const id = G.weapons.rshield ? 'rshield' : 'shield', w = G.weapons[id]; if (!w || w.cd > 0) return false;
+  w.cd = WEAPONS[id].lv[w.lvl - 1].cd; G.p.iframes = Math.max(G.p.iframes, .6);
   G.fx.push({ k: 'ring', t: .5, max: .5, c: '120,200,255' }); popText(G.p.x, G.p.y - 24, 'Bloqueado!', '#9fe0ff'); sfx('shieldbreak');
   return true;
 }
@@ -156,6 +156,8 @@ function playerDown() {
   } else { p.hp = 0; gameOver(); }
 }
 function hurtPlayer(d) {
+  const dw = G.weapons.dodge;
+  if (dw && Math.random() < WEAPONS.dodge.lv[dw.lvl - 1].ch) { G.p.iframes = Math.max(G.p.iframes, .35); popText(G.p.x, G.p.y - 24, 'Esquivou!', '#bfe8c0'); sfx('dash', .5); return; }
   if (shieldBlock()) return;
   const p = G.p, dmg = Math.max(1, Math.round(d - S.armor));
   p.hp -= dmg; p.iframes = .5; p.hurt = .25; G.shake = Math.max(G.shake, 6);

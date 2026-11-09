@@ -35,7 +35,7 @@ BOSS.knight = (e, dt, d, a) => {
 };
 BOSS.hound = (e, dt, d, a) => {
   const p = G.p;
-  if (!e.st) { go(e, 'orbit', 3.5); e.orb = Math.atan2(e.y - p.y, e.x - p.x); e.dir = Math.random() < .5 ? 1 : -1; }
+  if (!e.st) { go(e, 'orbit', 2.4); e.orb = Math.atan2(e.y - p.y, e.x - p.x); e.dir = Math.random() < .5 ? 1 : -1; }
   e.sT -= dt; e.cm = 1; const f = ph2(e);
   switch (e.st) {
     case 'orbit': {
@@ -43,7 +43,7 @@ BOSS.hound = (e, dt, d, a) => {
       const tx = p.x + Math.cos(e.orb) * 240, ty = p.y + Math.sin(e.orb) * 240, ang = Math.atan2(ty - e.y, tx - e.x), dd = Math.hypot(tx - e.x, ty - e.y);
       mv(e, ang, Math.min(420, dd * 5 + 170), dt); e.face = ang;
       e.tr -= dt; if (e.tr <= 0 && G.fire.length < 1100) { G.fire.push({ x: e.x, y: e.y, t: G.t }); e.tr = .05; }
-      if (e.sT <= 0) go(e, 'volley', .5);
+      if (e.sT <= 0) go(e, 'volley', .35);
       break; }
     case 'volley':
       e.face = a;
@@ -52,16 +52,16 @@ BOSS.hound = (e, dt, d, a) => {
         for (let i = 0; i < n; i++) eShot(e.x, e.y, a + (i - (n - 1) / 2) * .2, 360, { kind: 'fire', r: 9, dmg: 14 * e.dm, life: 2.2 });
         e.tx = p.x; e.ty = p.y; e.sx = e.x; e.sy = e.y;
         addHz({ x: p.x, y: p.y, r: 90, t: .6, dmg: 26 * e.dm, owner: e });
-        go(e, 'leapwind', .5);
+        go(e, 'leapwind', .35);
       }
       break;
     case 'leapwind': e.face = Math.atan2(e.ty - e.y, e.tx - e.x); if (e.sT <= 0) go(e, 'leap', .25); break;
     case 'leap': {
       const k = 1 - Math.max(0, e.sT) / .25;
       e.x = lerp(e.sx, e.tx, k); e.y = lerp(e.sy, e.ty, k);
-      if (e.sT <= 0) { G.shake = Math.max(G.shake, 8); if (f) ring(e, 8, 230, rand(0, TAU)); go(e, 'rest', f ? .8 : 1.2); }
+      if (e.sT <= 0) { G.shake = Math.max(G.shake, 8); if (f) ring(e, 8, 230, rand(0, TAU)); go(e, 'rest', f ? .35 : .5); }
       break; }
-    case 'rest': if (e.sT <= 0) go(e, 'orbit', f ? 3 : 4.2); break;
+    case 'rest': if (e.sT <= 0) go(e, 'orbit', f ? 1.8 : 2.4); break;
   }
 };
 BOSS.exec = (e, dt, d, a) => {

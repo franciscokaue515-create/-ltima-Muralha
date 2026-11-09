@@ -68,7 +68,7 @@ const WEAPONS = {
     { dmg: 9,  n: 3, r: 82, spd: 2.8, txt: '+1 machado.' },
     { dmg: 12, n: 4, r: 94, spd: 3.3, txt: 'Quatro machados mais rápidos, e +5 machados em chamas que giram por 2,5 s, somem e voltam 5 s depois.' }
   ] },
-  shield: { name: 'Escudo', lv: [
+  shield: { name: 'Escudo Mágico', lv: [
     { cd: 28, txt: 'Bloqueia 1 ataque inimigo e se quebra. Recarga de 28 s.' },
     { cd: 22, txt: 'Recarga de 22 s.' },
     { cd: 17, txt: 'Recarga de 17 s.' },
@@ -95,7 +95,7 @@ const dn = n => n <= 10 ? n : 10 + (n - 10) * .3;            // dificuldade efet
 const isBossRound = n => n >= 5 && (n - 5) % 4 === 0;        // chefão a cada 4 rounds: 3 rounds comuns entre eles
 
 /* custo base: desbloquear custa o valor base; cada nível seguinte custa mais */
-const COST_BASE = { sword: 14, whirl: 20, dash: 16, shock: 22, dagger: 22, axe: 26, bolt: 30, shield: 26, might: 24, haste: 24, boots: 20, armor: 22, vigor: 24 };
+const COST_BASE = { sword: 14, whirl: 20, dash: 16, shock: 22, dagger: 22, axe: 26, bolt: 30, shield: 26, rshield: 28, bomb: 28, squire: 30, orb: 30, bigsword: 32, rappelcut: 24, dodge: 22, multishot: 30, might: 24, haste: 24, boots: 20, armor: 22, vigor: 24 };
 
 const ENEMY = {
   skeleton:   { r: 11, hp: 14,   spd: 56,  dmg: 7,  xp: 1, mass: 1 },

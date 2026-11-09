@@ -191,3 +191,14 @@ h2 { font-size: clamp(30px, 6vw, 44px); line-height: 1.05; }
   .skill { width: 52px; height: 52px; }
 }
 @media (prefers-reduced-motion: reduce) { #banner { animation: none; } }
+
+/* seleção de personagem */
+.chars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 14px 0 6px; }
+.char { text-align: left; cursor: pointer; padding: 14px 14px 12px; background: rgba(12,18,22,.9); color: var(--bone); border: 1px solid var(--gold-dim); border-radius: 4px; font: inherit; display: flex; flex-direction: column; gap: 8px; }
+.char:hover, .char:focus-visible { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); outline: none; }
+.char b { font: 400 22px var(--display); color: var(--gold); letter-spacing: .04em; }
+.char .cd { font-size: 14px; line-height: 1.35; color: var(--mist); }
+.char ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; font-size: 14px; }
+.char li em { font: 700 11px var(--label); font-style: normal; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); display: inline-block; min-width: 58px; }
+.char .cw { font-size: 12px; color: var(--mist); border-top: 1px solid rgba(255,255,255,.08); padding-top: 7px; }
+@media (max-width: 760px) { .chars { grid-template-columns: 1fr; } }

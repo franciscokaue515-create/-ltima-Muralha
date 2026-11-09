@@ -7,7 +7,7 @@ function aimAngle() {
 function pressAction(a) {
   if (a === 'pause') { togglePause(); return; }
   if (state !== 'play') return;
-  if (a === 'dash') castDash(); else if (a === 'shock') castShock(); else if (a === 'whirl') castWhirl();
+  const f = CAST[G.char][a]; if (f && a !== 'sword') f();
 }
 const actionsFor = code => { const r = []; for (const x of ACTIONS) if (CFG.bind[x[0]] === code) r.push(x[0]); return r; };
 let swallowClick = false;

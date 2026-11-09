@@ -14,6 +14,25 @@ function drawPlayer(x, y) {
   ctx.save(); ctx.translate(x, y); ctx.rotate(p.face);
   if (p.iframes > 0 && Math.floor(G.t * 20) % 2) ctx.globalAlpha = .5;
   ctx.lineCap = 'round';
+  if (G.char === 'mage') {
+    ctx.strokeStyle = '#7a5a3a'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(4, 12); ctx.lineTo(27, 8); ctx.stroke();
+    const gl = .6 + .4 * Math.sin(G.t * 6); ctx.fillStyle = 'rgba(255,150,50,' + (.25 * gl) + ')'; ctx.beginPath(); ctx.arc(28, 8, 8, 0, TAU); ctx.fill();
+    ctx.fillStyle = G.flame ? '#ffd25a' : '#ff8a2a'; ctx.beginPath(); ctx.arc(28, 8, 4, 0, TAU); ctx.fill();
+    ctx.fillStyle = p.hurt > 0 ? '#e2574c' : '#5b3d9a'; ctx.strokeStyle = '#1e1438'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(0, 0, 13, 0, TAU); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#d9a93a'; ctx.beginPath(); ctx.ellipse(-3, 0, 3, 11, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#3b2a6e'; ctx.beginPath(); ctx.arc(1, 0, 9.5, 0, TAU); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#4b3690'; ctx.beginPath(); ctx.moveTo(14, 0); ctx.lineTo(-3, -6); ctx.lineTo(-3, 6); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#d9a93a'; ctx.beginPath(); ctx.arc(1, 0, 2.2, 0, TAU); ctx.fill();
+  } else if (G.char === 'rogue') {
+    ctx.fillStyle = '#6b4a2a'; ctx.strokeStyle = '#2a1a0c'; ctx.lineWidth = 1.2; ctx.fillRect(-12, 3, 6, 11); ctx.strokeRect(-12, 3, 6, 11);
+    ctx.save(); ctx.translate(6, 0); drawBow(13, '#8a5a2a'); ctx.restore();
+    ctx.fillStyle = p.hurt > 0 ? '#e2574c' : '#3d6b4a'; ctx.strokeStyle = '#13241a'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(0, 0, 12.5, 0, TAU); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#26402f'; ctx.beginPath(); ctx.arc(0, 0, 9, 0, TAU); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#e0b894'; ctx.beginPath(); ctx.arc(4, 0, 4, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#a02a2a'; ctx.fillRect(-2, -12.5, 6, 3);
+  } else {
   ctx.strokeStyle = '#d3dce4'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(8, 11); ctx.lineTo(27, 7); ctx.stroke();
   ctx.strokeStyle = '#7a5a3a'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(8, 11); ctx.lineTo(5, 12); ctx.stroke();
   ctx.fillStyle = '#d9a93a'; ctx.strokeStyle = '#14233d'; ctx.lineWidth = 1.5;
@@ -27,6 +46,7 @@ function drawPlayer(x, y) {
   ctx.fillStyle = '#aeb9c4'; ctx.strokeStyle = '#1b2430'; ctx.lineWidth = 1.5;
   ctx.beginPath(); ctx.arc(1, 0, 8.5, 0, TAU); ctx.fill(); ctx.stroke();
   ctx.strokeStyle = '#1b2430'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(5.5, -4); ctx.lineTo(5.5, 4); ctx.stroke();
+  }
   ctx.restore();
   if (p.burn > 0) {
     for (let i = 0; i < 4; i++) {
@@ -281,6 +301,103 @@ function drawFire(X, Y) {
   }
 }
 
+
+function drawPShot(s, x, y) {
+  switch (s.kind) {
+    case 'fire':
+      dot(x, y, 18, 'rgba(255,110,30,.22)'); dot(x - s.vx * .02, y - s.vy * .02, 9, 'rgba(255,140,40,.5)'); dot(x, y, 8, '#ff8a2a'); dot(x, y, 4, '#ffe08a'); break;
+    case 'ice':
+      dot(x, y, 20, 'rgba(140,210,255,.22)'); dot(x, y, 9, '#bfe8ff'); dot(x - 2, y - 2, 4, '#ffffff'); break;
+    case 'refl':
+      dot(x, y, 14, 'rgba(255,220,120,.3)'); dot(x, y, 7, '#ffe08a'); dot(x, y, 3, '#fff'); break;
+    default: {   // flechas
+      ctx.save(); ctx.translate(x, y); ctx.rotate(s.a);
+      const el = s.kind === 'earrow';
+      ctx.strokeStyle = el ? '#9fd0ff' : '#d8c9a0'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(9, 0); ctx.stroke();
+      if (el) { ctx.strokeStyle = 'rgba(180,220,255,.5)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(-14, 0); ctx.lineTo(8, 0); ctx.stroke(); }
+      ctx.fillStyle = el ? '#e8f4ff' : '#c9d2da'; ctx.beginPath(); ctx.moveTo(12, 0); ctx.lineTo(6, -3); ctx.lineTo(6, 3); ctx.closePath(); ctx.fill();
+      ctx.restore();
+    }
+  }
+}
+function drawChars(X, Y) {
+  const P = G.p;
+  // lança-chamas
+  const fl = G.flame;
+  if (fl && fl.on) {
+    const L = CORE.shock.lv[G.core.shock - 1], px = X(P.x), py = Y(P.y);
+    ctx.save(); ctx.translate(px, py); ctx.rotate(fl.a);
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, L.rng, -L.arc / 2, L.arc / 2); ctx.closePath();
+    const gr = ctx.createRadialGradient(0, 0, 10, 0, 0, L.rng); gr.addColorStop(0, 'rgba(255,220,120,.55)'); gr.addColorStop(.6, 'rgba(255,120,30,.3)'); gr.addColorStop(1, 'rgba(255,60,10,0)');
+    ctx.fillStyle = gr; ctx.fill(); ctx.restore();
+  }
+  if (fl) { const w = clamp(fl.t / 10, 0, 1); ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(X(P.x) - 16, Y(P.y) + 27, 32, 4); ctx.fillStyle = '#ff9a2a'; ctx.fillRect(X(P.x) - 16, Y(P.y) + 27, 32 * w, 4); }
+  // redes
+  for (const n of G.nets) {
+    const x = X(n.x), y = Y(n.y), arm = n.st === 1, pl = arm ? .5 + .5 * Math.sin(G.t * 18) : 0;
+    ctx.save(); ctx.translate(x, y);
+    ctx.fillStyle = arm ? 'rgba(255,120,80,' + (.14 + .1 * pl) + ')' : 'rgba(150,210,140,.1)'; ctx.beginPath(); ctx.arc(0, 0, n.r, 0, TAU); ctx.fill();
+    ctx.strokeStyle = arm ? 'rgba(255,150,100,.9)' : 'rgba(190,225,170,.75)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, n.r, 0, TAU); ctx.stroke();
+    ctx.lineWidth = 1; ctx.beginPath();
+    for (let i = 1; i < 4; i++) { const rr = n.r * i / 4; ctx.moveTo(rr, 0); ctx.arc(0, 0, rr, 0, TAU); }
+    for (let i = 0; i < 8; i++) { ctx.moveTo(0, 0); ctx.lineTo(Math.cos(i * TAU / 8) * n.r, Math.sin(i * TAU / 8) * n.r); }
+    ctx.stroke(); ctx.restore();
+  }
+  // chuva de flechas
+  for (const r of G.rains) {
+    const x = X(r.x), y = Y(r.y), k = clamp(1 - r.t / (r.wi ? .55 : 1), 0, 1);
+    ctx.fillStyle = 'rgba(255,190,90,' + (.08 + .1 * k) + ')'; ctx.beginPath(); ctx.arc(x, y, r.r, 0, TAU); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,200,110,.8)'; ctx.lineWidth = 2; ctx.setLineDash([8, 6]); ctx.beginPath(); ctx.arc(x, y, r.r, 0, TAU); ctx.stroke(); ctx.setLineDash([]);
+    ctx.strokeStyle = '#e6d8b0'; ctx.lineWidth = 2;
+    for (let i = 0; i < 14; i++) {
+      const ax = x + Math.cos(i * 2.4 + r.wi) * r.r * (.15 + .8 * ((i * 37) % 10) / 10), ay = y + Math.sin(i * 2.4 + r.wi) * r.r * (.15 + .8 * ((i * 37) % 10) / 10), h = (1 - k) * 380 + 8;
+      ctx.beginPath(); ctx.moveTo(ax, ay - h - 16); ctx.lineTo(ax, ay - h); ctx.stroke();
+    }
+  }
+  // bombas plantadas
+  for (const b of G.bombsP) {
+    const x = X(b.x), y = Y(b.y), bl = Math.floor(G.t * (6 + (1 - b.t / b.max) * 14)) % 2;
+    ctx.fillStyle = 'rgba(255,150,40,' + (.06 + .1 * (1 - b.t / b.max)) + ')'; ctx.beginPath(); ctx.arc(x, y, b.rad, 0, TAU); ctx.fill();
+    dot(x, y, 9, bl ? '#7a2a1a' : '#2b2b30'); dot(x - 3, y - 3, 3, 'rgba(255,255,255,.35)');
+    ctx.strokeStyle = '#c9a23a'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x + 4, y - 8); ctx.lineTo(x + 8, y - 13); ctx.stroke(); dot(x + 8, y - 13, 2.5, bl ? '#ffe08a' : '#ff7a2a');
+  }
+  // escudeiros
+  const sqw = G.weapons.squire;
+  if (sqw && sqw.sq) for (const q of sqw.sq) {
+    const x = X(q.x), y = Y(q.y);
+    ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.ellipse(x, y + 7, 9, 4, 0, 0, TAU); ctx.fill();
+    ctx.save(); ctx.translate(x, y); ctx.rotate(q.a);
+    ctx.fillStyle = '#6d7d8c'; ctx.strokeStyle = '#1b2430'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(0, 0, 9, 0, TAU); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#d9a93a'; ctx.beginPath(); ctx.arc(2, 0, 5, 0, TAU); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = '#d3dce4'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(6, 6); ctx.lineTo(18, 4); ctx.stroke();
+    ctx.restore();
+  }
+  // esferas elétricas
+  const ob = G.weapons.orb;
+  if (ob && ob.o) for (const q of ob.o) {
+    const x = X(q.x), y = Y(q.y), pl = .6 + .4 * Math.sin(G.t * 9 + q.x);
+    dot(x, y, 16, 'rgba(120,180,255,' + (.18 + .1 * pl) + ')'); dot(x, y, 8, '#9fd0ff'); dot(x, y, 4, '#fff');
+    ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 1.3; ctx.beginPath(); ctx.moveTo(x - 5, y - 2); ctx.lineTo(x, y + 1); ctx.lineTo(x - 1, y - 4); ctx.lineTo(x + 5, y + 2); ctx.stroke();
+  }
+  // grande espada mágica
+  const bs = G.weapons.bigsword;
+  if (bs && bs.len) {
+    const L = bs.len, px = X(P.x), py = Y(P.y), fire = bs.fire;
+    ctx.save(); ctx.translate(px, py); ctx.rotate(bs.ang);
+    for (let i = 1; i <= 4; i++) { ctx.globalAlpha = .12 / i; ctx.fillStyle = fire ? '#7a30c0' : '#9fc4ff'; ctx.beginPath(); ctx.moveTo(14, 0); ctx.arc(0, 0, 14 + L, -.18 * i, 0); ctx.closePath(); ctx.fill(); ctx.rotate(0); }
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = fire ? '#1a1020' : '#cfe2ff'; ctx.strokeStyle = fire ? '#b060ff' : '#5b7fb8'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(14, -7); ctx.lineTo(14 + L * .9, -5); ctx.lineTo(14 + L, 0); ctx.lineTo(14 + L * .9, 5); ctx.lineTo(14, 7); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = '#d9a93a'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(12, -12); ctx.lineTo(12, 12); ctx.stroke();
+    if (fire) for (let i = 0; i < 6; i++) { const fx = 20 + i * L / 6.5, fy = Math.sin(G.t * 20 + i * 2) * 6; dot(fx, fy, 7 - i * .5, 'rgba(' + (i % 2 ? '120,40,200' : '255,90,40') + ',.55)'); }
+    ctx.restore();
+  }
+  // corda do rapel
+  if (G.rope && P.dash && P.dash.rap) {
+    ctx.strokeStyle = '#c9a86a'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(X(P.x), Y(P.y)); ctx.lineTo(X(G.rope.x), Y(G.rope.y)); ctx.stroke();
+    dot(X(G.rope.x), Y(G.rope.y), 5, '#7a7a82');
+  }
+}
 function draw() {
   const cam = G.cam, sh = REDUCE ? 0 : G.shake;
   const cx = cam.x + (sh ? rand(-sh, sh) : 0), cy = cam.y + (sh ? rand(-sh, sh) : 0);
@@ -310,6 +427,8 @@ function draw() {
     const x = X(e.x), y = Y(e.y), m = e.r * 3 + 12;
     if (x < -m || x > W + m || y < -m || y > H + m) continue;
     drawEnemy(e, x, y);
+    if (e.fz > 0) { ctx.fillStyle = 'rgba(150,215,255,.45)'; ctx.strokeStyle = 'rgba(220,245,255,.8)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(x, y, e.r + 3, 0, TAU); ctx.fill(); ctx.stroke(); }
+    if (e.brn > 0) for (let i = 0; i < 3; i++) { const fl = Math.sin(G.t * 14 + i * 2 + e.id); dot(x + Math.cos(i * 2.1 + G.t * 3) * e.r * .6, y - e.r * .4 - i * 3 - fl * 2, 3.6 - i * .6, 'rgba(255,' + (140 + fl * 40 | 0) + ',40,.85)'); }
   }
 
   // machados do Carrasco
@@ -324,21 +443,22 @@ function draw() {
 
   // carga da onda de choque
   const P = G.p;
-  if (playing && P.channel > 0) {
-    const L = CORE.shock.lv[G.core.shock - 1], t = P.channel / P.chMax, rr = lerp(18, L.rad, t);
-    ctx.strokeStyle = 'rgba(217,169,58,' + (.9 - t * .5) + ')'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(X(P.x), Y(P.y), rr, 0, TAU); ctx.stroke();
-    ctx.fillStyle = 'rgba(217,169,58,' + ((1 - t) * .22) + ')'; ctx.beginPath(); ctx.arc(X(P.x), Y(P.y), rr, 0, TAU); ctx.fill();
+  if (playing && P.channel > 0 && P.chKind === 'tele') {
+    const t = P.channel / P.chMax, m = mouseWorld(), mx = X(m.x), my = Y(m.y), rr = lerp(14, 34, t);
+    ctx.strokeStyle = 'rgba(182,140,255,' + (.9 - t * .4) + ')'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(X(P.x), Y(P.y), lerp(40, 14, t), 0, TAU); ctx.stroke();
+    ctx.setLineDash([6, 6]); ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(mx, my, rr, 0, TAU); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(182,140,255,' + ((1 - t) * .25) + ')'; ctx.beginPath(); ctx.arc(mx, my, rr, 0, TAU); ctx.fill();
   }
   if (playing) drawPlayer(X(P.x), Y(P.y));
-  const shw = G.weapons.shield;
+  const shid = G.weapons.rshield ? 'rshield' : 'shield', shw = G.weapons[shid];
   if (shw && playing) {
     const px = X(P.x), py = Y(P.y);
     if (shw.cd <= 0) {
       const pl = .5 + .5 * Math.sin(G.t * 4);
-      ctx.fillStyle = 'rgba(120,200,255,' + (.08 + .05 * pl) + ')'; ctx.beginPath(); ctx.arc(px, py, 25, 0, TAU); ctx.fill();
-      ctx.strokeStyle = 'rgba(160,225,255,' + (.55 + .25 * pl) + ')'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = shid === 'rshield' ? 'rgba(255,215,120,' + (.08 + .05 * pl) + ')' : 'rgba(120,200,255,' + (.08 + .05 * pl) + ')'; ctx.beginPath(); ctx.arc(px, py, 25, 0, TAU); ctx.fill();
+      ctx.strokeStyle = shid === 'rshield' ? 'rgba(255,225,150,' + (.55 + .25 * pl) + ')' : 'rgba(160,225,255,' + (.55 + .25 * pl) + ')'; ctx.lineWidth = 2; ctx.stroke();
     } else {
-      const mx = WEAPONS.shield.lv[shw.lvl - 1].cd;
+      const mx = WEAPONS[shid].lv[shw.lvl - 1].cd;
       ctx.strokeStyle = 'rgba(120,200,255,.35)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(px, py, 24, -Math.PI / 2, -Math.PI / 2 + TAU * (1 - shw.cd / mx)); ctx.stroke();
     }
   }
@@ -383,9 +503,12 @@ function draw() {
     ctx.restore(); ctx.globalAlpha = 1;
   }
 
-  // adagas do jogador
+  drawChars(X, Y);
+
+  // projéteis do jogador
   for (const s of G.shots) {
     const x = X(s.x), y = Y(s.y);
+    if (s.kind) { drawPShot(s, x, y); continue; }
     ctx.strokeStyle = 'rgba(230,236,240,.25)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - s.vx * .04, y - s.vy * .04); ctx.stroke();
     ctx.save(); ctx.translate(x, y); ctx.rotate(s.a);
     ctx.fillStyle = '#e3e9ee'; ctx.beginPath(); ctx.moveTo(10, 0); ctx.lineTo(-5, -3); ctx.lineTo(-5, 3); ctx.closePath(); ctx.fill();
@@ -424,6 +547,15 @@ function draw() {
         ctx.beginPath(); ctx.arc(0, 0, rr, -f.arc / 2, f.arc / 2); ctx.stroke();
       }
       ctx.restore();
+    } else if (f.k === 'zap') {
+      ctx.lineJoin = 'round';
+      for (const pass of [[4, 'rgba(120,180,255,' + a + ')'], [1.5, 'rgba(255,255,255,' + a + ')']]) {
+        ctx.lineWidth = pass[0]; ctx.strokeStyle = pass[1]; ctx.beginPath();
+        f.pts.forEach((q, i) => { if (i) ctx.lineTo(X(q[0]), Y(q[1])); else ctx.moveTo(X(q[0]), Y(q[1])); });
+        ctx.stroke();
+      }
+    } else if (f.k === 'rope') {
+      ctx.strokeStyle = 'rgba(200,170,110,' + a + ')'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(X(f.x1), Y(f.y1)); ctx.lineTo(X(f.x2), Y(f.y2)); ctx.stroke();
     } else if (f.k === 'ring') {
       ctx.strokeStyle = 'rgba(' + f.c + ',' + a + ')'; ctx.lineWidth = 4;
       ctx.beginPath(); ctx.arc(X(G.p.x), Y(G.p.y), 12 + (1 - a) * 120, 0, TAU); ctx.stroke();

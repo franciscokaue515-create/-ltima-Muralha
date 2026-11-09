@@ -45,7 +45,7 @@ function updateHazards(dt) {
       h.dur -= dt; h.tk -= dt;
       if (h.tk <= 0) {
         h.tk += h.dps ? .2 : .25;
-        if (h.dps) { if (hzHits(h) && !shieldBlock()) { const dd = Math.max(1, Math.round(h.dps * .2 - S.armor * .3)); p.hp -= dd; p.hurt = .12; popText(p.x, p.y - 20, '-' + dd, '#ffa24a'); if (p.burn <= 0) p.bt = .5; p.burn = 3; if (p.hp <= 0) playerDown(); } }
+        if (h.dps) { if (hzHits(h) && !p.dash && !shieldBlock()) { const dd = Math.max(1, Math.round(h.dps * .2 - S.armor * .3)); p.hp -= dd; p.hurt = .12; popText(p.x, p.y - 20, '-' + dd, '#ffa24a'); if (p.burn <= 0) p.bt = .5; p.burn = 3; if (p.hp <= 0) playerDown(); } }
         else if (h.dmg > 0 && p.iframes <= 0 && hzHits(h)) hurtPlayer(h.dmg);
       }
       if (h.dur <= 0) G.hz.splice(i, 1);
@@ -73,7 +73,7 @@ function updateEnemyShots(dt) {
     }
     if (s.life > 0 && !s.noHit && !s.hit && p.iframes <= 0) {
       const dx = p.x - s.x, dy = p.y - s.y, rr = s.r + p.r * .8;
-      if (dx * dx + dy * dy < rr * rr) { hurtPlayer(s.dmg); s.hit = true; if (!s.ret) s.life = 0; }
+      if (dx * dx + dy * dy < rr * rr) { if (!reflectShot(s)) hurtPlayer(s.dmg); s.hit = true; if (!s.ret) s.life = 0; }
     }
     if (s.life <= 0) { G.es[i] = G.es[G.es.length - 1]; G.es.pop(); }
   }

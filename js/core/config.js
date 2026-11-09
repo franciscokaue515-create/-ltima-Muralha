@@ -3,7 +3,7 @@
 const CFG_KEY = 'ultima-muralha-config';
 const ACTIONS = [
   ['up', 'Mover para cima'], ['down', 'Mover para baixo'], ['left', 'Mover para a esquerda'], ['right', 'Mover para a direita'],
-  ['sword', 'Espada (segure para repetir)'], ['whirl', 'Giro Devastador'], ['dash', 'Avanço Fugaz'], ['shock', 'Onda de Choque'], ['pause', 'Pausar']
+  ['sword', 'Ataque principal (segure para repetir)'], ['whirl', 'Habilidade 2 (Giro / Bomba de Gelo / Trapaceira)'], ['dash', 'Habilidade 3 (Avanço / Teletransporte / Rapel)'], ['shock', 'Habilidade 4 (Onda de Choque / Lança-chamas / Chuva de Flechas)'], ['pause', 'Pausar']
 ];
 const DEF_BIND = { up: 'KeyW', down: 'KeyS', left: 'KeyA', right: 'KeyD', sword: 'Mouse0', whirl: 'Mouse2', dash: 'Space', shock: 'KeyE', pause: 'Escape' };
 const CFG = { master: .8, sfx: .8, music: .45, mute: false, bind: Object.assign({}, DEF_BIND) };

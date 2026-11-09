@@ -2,7 +2,7 @@
 function updateHud() {
   const hp = Math.max(0, Math.ceil(G.p.hp)), hk = hp + '/' + G.p.maxhp;
   if (hc.hp !== hk) { el.hpfill.style.width = (hp / G.p.maxhp * 100) + '%'; el.hptext.textContent = hk; hc.hp = hk; }
-  const eu = G.core.sword >= 4, ev = eu ? Math.round(G.en) : -1;
+  const eu = G.char === 'warrior' && G.core.sword >= 4, ev = eu ? Math.round(G.en) : -1;
   if (hc.en !== ev) { el.en.hidden = !eu; el.enfill.style.width = G.en + '%'; el.en.classList.toggle('full', G.en >= 100); hc.en = ev; }
   if (hc.lives !== G.lives) { el.lives.textContent = G.lives; hc.lives = G.lives; }
   if (hc.blue !== G.blue) { el.blue.textContent = G.blue; hc.blue = G.blue; }
@@ -27,7 +27,7 @@ function updateHud() {
     if (cd > .95) { const tot = Math.ceil(cd); txt = tot >= 60 ? Math.floor(tot / 60) + ':' + String(tot % 60).padStart(2, '0') : String(tot); }
     if (hc['t' + id] !== txt) { s.cdt.textContent = txt; hc['t' + id] = txt; }
     if (hc['l' + id] !== lv) { s.sl.textContent = lv; hc['l' + id] = lv; }
-    const on = (id === 'whirl' && !!G.whirl) || (id === 'shock' && G.p.channel > 0);
+    const on = (id === 'whirl' && !!G.whirl) || (id === 'shock' && !!G.flame) || (id === 'dash' && G.p.channel > 0);
     if (hc['o' + id] !== on) { s.root.classList.toggle('on', on); hc['o' + id] = on; }
   }
 }
